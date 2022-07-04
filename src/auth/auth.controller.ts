@@ -1,13 +1,23 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signup')
-  signup() {
-    return this.authService.signup('username', 'password');
+  signup(@Req() req: Request, @Res() res: Response) {
+    const { username, password } = req.body;
+
+    if (!username || !password)
+      return res
+        .status(400)
+        .json({ error: { message: 'username and password are required' } });
+
+    const result = this.authService.signup(username, password);
+
+    return res.json(result);
   }
 
   @Post('signin')
